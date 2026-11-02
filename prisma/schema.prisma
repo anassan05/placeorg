@@ -1,0 +1,69 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  PLATFORM_SUPER_ADMIN
+  COLLEGE_ADMIN
+  PLACEMENT_OFFICER
+  COORDINATOR
+  STUDENT
+}
+
+model College {
+  id    String @id @default(uuid()) @db.Uuid
+  name  String
+  users User[]
+
+  @@map("colleges")
+}
+
+model User {
+  id              String  @id @default(uuid()) @db.Uuid
+  email           String  @unique
+  role            Role
+  collegeId       String? @map("college_id") @db.Uuid
+  createdByUserId String? @map("created_by_user_id") @db.Uuid
+  college         College? @relation(fields: [collegeId], references: [id], onDelete: Restrict)
+  createdBy       User? @relation("creator", fields: [collegeId, createdByUserId], references: [collegeId, id], onDelete: Restrict, onUpdate: Restrict)
+  createdUsers    User[] @relation("creator")
+  credential      AuthCredential?
+
+  @@unique([collegeId, id])
+  @@map("users")
+}
+
+
+model AuthCredential {
+  userId       String @id @map("user_id") @db.Uuid
+  passwordHash String @map("password_hash")
+  disabledAt   DateTime? @map("disabled_at") @db.Timestamptz(3)
+  user         User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessions     AuthSession[]
+
+  @@map("auth_credentials")
+}
+
+model AuthSession {
+  tokenHash  String @id @map("token_hash")
+  userId     String @map("user_id") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  expiresAt  DateTime @map("expires_at") @db.Timestamptz(3)
+  credential AuthCredential @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("auth_sessions")
+}
+
+model AuthRateLimit {
+  key       String @id
+  startedAt DateTime @map("started_at") @db.Timestamptz(3)
+  attempts  Int
+
+  @@map("auth_rate_limits")
+}
