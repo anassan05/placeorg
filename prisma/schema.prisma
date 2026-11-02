@@ -1,0 +1,38 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  PLATFORM_SUPER_ADMIN
+  COLLEGE_ADMIN
+  PLACEMENT_OFFICER
+  COORDINATOR
+  STUDENT
+}
+
+model College {
+  id    String @id @default(uuid()) @db.Uuid
+  name  String
+  users User[]
+
+  @@map("colleges")
+}
+
+model User {
+  id              String  @id @default(uuid()) @db.Uuid
+  email           String  @unique
+  role            Role
+  collegeId       String? @map("college_id") @db.Uuid
+  createdByUserId String? @map("created_by_user_id") @db.Uuid
+  college         College? @relation(fields: [collegeId], references: [id], onDelete: Restrict)
+  createdBy       User? @relation("creator", fields: [collegeId, createdByUserId], references: [collegeId, id], onDelete: Restrict, onUpdate: Restrict)
+  createdUsers    User[] @relation("creator")
+
+  @@unique([collegeId, id])
+  @@map("users")
+}
