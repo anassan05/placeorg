@@ -13,14 +13,14 @@ Updated 2026-11-02. This is a new implementation in `placeorg`, not a production
 
 - `npm ci`: passed.
 - `npm run lint`: passed, zero warnings.
-- `npm run typecheck`: passed before the latest build; rerun after source changes as needed.
+- `npm run typecheck`: passed after the build.
 - `npm test`: 1 passed, 0 failed.
 - `npm run build`: passed.
 - `npx prisma generate`: **failed**, Prisma's engine download host was inaccessible in the sandbox. Prisma migrations and schema generation were not verified here.
 - `npm run test:integration`: **failed before running tests** because no disposable PostgreSQL URLs were available; PostgreSQL and Docker are absent in this sandbox. No PostgreSQL security claim is verified by this run.
 - `npm run test:e2e`: **2 failed**, no browser executable was installed; no browser behavior verified.
 - `npm audit --json`: 17 affected packages, 14 moderate and 3 high, 0 critical. `npm audit --omit=dev`: 3 high. Audit exits nonzero; details and mitigation in `architecture/SECURITY.md`. Counts can change with the registry.
-- GitHub Actions is configured but no run exists for these uncommitted changes. The configuration is not evidence of a passed CI run.
+- GitHub Actions is configured; a passing run for the current head has not yet been verified. The configuration alone is not evidence of a passed CI run.
 
 ## Outstanding work and gates
 
