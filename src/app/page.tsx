@@ -14,7 +14,7 @@ export default function Home() {
     <header className="site-header"><div className="wrap nav">
       <a className="brand" href="#top" aria-label="CampusConnect home"><span className="brand-mark" aria-hidden="true">C<span>✳</span></span><span>campus<span className="brand-light">connect</span></span></a>
       <nav aria-label="Main navigation"><a href="#approach">Our approach</a><a href="#how-it-works">How it works</a><a href="#status">Project status</a></nav>
-      <a className="nav-link" href="#status">Explore the project <span aria-hidden="true">↗</span></a>
+      <a className="nav-link" href="/login">Sign in <span aria-hidden="true">↗</span></a>
     </div></header>
     <main id="main">
       <section className="hero" id="top"><div className="wrap hero-inner">
@@ -30,7 +30,7 @@ export default function Home() {
         <div className="feature-grid">{features.map(f => <article className="feature" key={f.n}><div className="feature-top"><span className="feature-icon" aria-hidden="true">{f.icon}</span><span className="feature-num">{f.n} / 03</span></div><h3>{f.title}</h3><p>{f.text}</p></article>)}</div>
       </div></section>
       <section className="process-section" id="how-it-works"><div className="wrap process-grid"><div><p className="eyebrow green">THE APPROACH <span>— 02</span></p><h2>A little structure.<br/><em>A lot of possibility.</em></h2><p className="process-intro">A connected placement journey, designed around the people who make it happen.</p><div className="process-stamp" aria-hidden="true">✳</div></div><div className="steps">{steps.map(s => <article className="step" key={s.num}><span>{s.num}</span><div><h3>{s.title}</h3><p>{s.detail}</p></div><span aria-hidden="true">↗</span></article>)}</div></div></section>
-      <section className="status-section" id="status"><div className="wrap status-box"><div><p className="eyebrow">A NOTE FROM THE TEAM <span>— 03</span></p><h2>We’re building<br/><em>something meaningful.</em></h2><p>CampusConnect is under development. College onboarding, accounts, and placement workflows are not available yet.</p></div><div className="status-side"><span className="status-pill"><span className="dot"/> IN DEVELOPMENT</span><p>Follow along as we build a more connected placement journey.</p><a href="/api/health" className="button light">View liveness endpoint <span aria-hidden="true">↗</span></a></div></div></section>
+      <section className="status-section" id="status"><div className="wrap status-box"><div><p className="eyebrow">A NOTE FROM THE TEAM <span>— 03</span></p><h2>We’re building<br/><em>something meaningful.</em></h2><p>CampusConnect is under development. Account provisioning, college onboarding, and placement workflows are not yet available through the application.</p></div><div className="status-side"><span className="status-pill"><span className="dot"/> IN DEVELOPMENT</span><p>Follow along as we build a more connected placement journey.</p><a href="/api/health" className="button light">View liveness endpoint <span aria-hidden="true">↗</span></a></div></div></section>
     </main>
     <footer><div className="wrap footer-inner"><a className="brand" href="#top"><span className="brand-mark" aria-hidden="true">C<span>✳</span></span><span>campus<span className="brand-light">connect</span></span></a><p>Making space for what’s next.</p><a href="#top">Back to top ↑</a></div><div className="wrap footer-bottom"><span>© {new Date().getFullYear()} CampusConnect</span><span>BUILT FOR BETTER CONNECTIONS</span></div></footer>
   </>;

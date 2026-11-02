@@ -1,29 +1,24 @@
 # Implementation status
 
-Updated 2026-11-02. This is a new implementation in `placeorg`, not a production release.
+Updated 2026-11-02. CampusConnect is incomplete, unreviewed and not ready for institutional use or production deployment.
 
-## Implemented for review
+## Current implementation
 
-- Next.js public informational landing page and liveness endpoint; explicitly says the platform is in development.
-- Strict TypeScript, Tailwind setup, security response headers, Vitest, Playwright, GitHub Actions and local PostgreSQL 16 Compose configuration.
-- Initial Prisma College/User schema, five-role enum, tenant/role CHECK, tenant-aware creator FK, versioned SQL migration, forced RLS and restricted-runtime role scripts. These changes are **not yet verified against PostgreSQL** in this environment and require independent security review.
-- PostgreSQL integration tests for missing context, cross-tenant access, tenant-aware FK, pooled connections, role provisioning and the forgeable custom setting. Playwright tests cover landing navigation and a mobile viewport. Both suites are configured in CI but have not passed here.
+- Public informational landing, liveness endpoint, Next.js/TypeScript/Tailwind foundation and CI.
+- College/User/five-role schema, RLS policies, tenant-aware creator foreign key and separate restricted tenant runtime role.
+- Initial sign-in/sign-out slice: separate restricted auth identity; bcrypt cost 12 offline first-admin bootstrap; case-insensitive identity lookup; bounded form input and origin checks; database-backed HMAC-keyed per-identifier rate limiting; randomly generated, hashed, expiring and revocable session tokens; current database identity/status check; a minimal default-deny permission matrix; private account workspace. No tenant-data route exists. This is not complete authentication or RBAC and needs independent review.
+- PostgreSQL and browser tests for the above are configured in CI; the new auth changes have not been verified locally against PostgreSQL or a browser. The earlier foundation head `510818375dffd4566588152106a64bdde7866cbb` passed [CI 41477274566](https://github.com/anassan05/placeorg/actions/runs/41477274566), including database integration and browser steps; detailed logs/test counts were inaccessible here. This does not verify later auth changes.
 
-## Local verification (2026-11-02)
+## Local verification of the authentication increment
 
-- `npm ci`: passed.
-- `npm run lint`: passed, zero warnings.
-- `npm run typecheck`: passed after the build.
-- `npm test`: 1 passed, 0 failed.
+- `npm run lint` and `npm run typecheck`: passed.
+- `npm test`: 6 passed, 0 failed.
 - `npm run build`: passed.
-- `npx prisma generate`: **failed**, Prisma's engine download host was inaccessible in the sandbox. Prisma migrations and schema generation were not verified here.
-- `npm run test:integration`: **failed before running tests** because no disposable PostgreSQL URLs were available; PostgreSQL and Docker are absent in this sandbox. No PostgreSQL security claim is verified by this run.
-- `npm run test:e2e`: **2 failed**, no browser executable was installed; no browser behavior verified.
-- `npm audit --json`: 17 affected packages, 14 moderate and 3 high, 0 critical. `npm audit --omit=dev`: 3 high. Audit exits nonzero; details and mitigation in `architecture/SECURITY.md`. Counts can change with the registry.
-- GitHub Actions is configured; a passing run for the current head has not yet been verified. The configuration alone is not evidence of a passed CI run.
+- `npm run test:integration`: failed before running tests because disposable database URLs/PostgreSQL are unavailable.
+- Playwright: new auth E2E tests not run locally; the previous attempt failed because Chromium was not installed.
+- `npm audit --json`: 17 affected packages (14 moderate, 3 high, 0 critical); `npm audit --omit=dev`: 3 high. Audit exits nonzero. See `architecture/SECURITY.md`.
+- Prisma generation and migration were not verified locally because the engine download host was inaccessible. Current-head CI must be checked separately.
 
-## Outstanding work and gates
+## Remaining work and risk
 
-Authentication, server-side authorization, trusted tenant derivation, tenant transaction helper, onboarding, user management, student documents, company and drive management, eligibility, applications, recruitment, offers, coordinator access, analytics, notifications, audit logging, privacy/deletion workflows, production storage, deployment and operational procedures are **not implemented**. The public page is not a product workflow. No tenant-data route should be added before verified identity and authorization exist.
-
-The initial migration and role scripts need a fresh PostgreSQL integration run and independent review before depending on them. RLS custom settings can be forged by runtime credentials; RLS is defense in depth against missing filters, not an independent identity boundary. Dependency high findings and the PostCSS override require review before release. No production deployment or security certification is implied.
+Authentication still lacks controlled invitations, recovery/password changes, email verification, complete account suspension/session revocation, audit logging, stronger global/trusted-edge abuse controls and expiration cleanup. Per-identifier rate limiting alone does not prevent distributed attacks or storage exhaustion. There is no complete centralized business permission model, tenant transaction helper or resource-level coordinator/student authorization. Student/company/drive/eligibility/application/recruitment/offer/report/notification modules, privacy/deletion workflows, private storage, deployment and production operations are not implemented. Custom tenant GUCs are forgeable; RLS is defense in depth, not independent identity verification. No production deployment or security certification is implied.

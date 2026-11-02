@@ -74,7 +74,7 @@ describe("PostgreSQL tenant defenses", () => {
     expect(r.rowCount).toBe(2);
     for (const row of r.rows) expect(row).toMatchObject({ relrowsecurity: true, relforcerowsecurity: true });
     for (const row of r.rows) expect(row.owner).not.toBe("campusconnect_runtime");
-    const policies = await pool.query("SELECT roles::text AS roles, qual, with_check FROM pg_policies WHERE schemaname='public' AND tablename IN ('users','colleges')");
+    const policies = await pool.query("SELECT roles::text AS roles, qual, with_check FROM pg_policies WHERE schemaname='public' AND tablename IN ('users','colleges') AND policyname != 'users_auth_lookup'");
     expect(policies.rowCount).toBe(2);
     for (const row of policies.rows) { expect(row.roles).toEqual("{campusconnect_runtime}"); expect(row.qual).toContain("app.college_id"); expect(row.with_check).toContain("app.college_id"); }
   });

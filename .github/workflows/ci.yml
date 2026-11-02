@@ -21,6 +21,11 @@ jobs:
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/campusconnect_test?schema=public
       TEST_ADMIN_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/campusconnect_test
+      AUTH_DATABASE_URL: postgresql://campusconnect_auth:test_auth_password@localhost:5432/campusconnect_test
+      AUTH_RATE_LIMIT_SECRET: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+      APP_ORIGIN: http://127.0.0.1:3000
+      E2E_TEST_EMAIL: synthetic-admin@example.test
+      E2E_TEST_PASSWORD: synthetic-test-password-only
       TEST_RUNTIME_DATABASE_URL: postgresql://campusconnect_runtime:test_only_password@localhost:5432/campusconnect_test
     steps:
       - uses: actions/checkout@v4
@@ -32,18 +37,22 @@ jobs:
       - run: npx prisma generate
       - name: Provision runtime role before migration
         run: |
+          psql "$TEST_ADMIN_DATABASE_URL" -v ON_ERROR_STOP=1 -f prisma/admin/create-auth-role.sql
           psql "$TEST_ADMIN_DATABASE_URL" -v ON_ERROR_STOP=1 -f prisma/admin/create-runtime-role.sql
           psql "$TEST_ADMIN_DATABASE_URL" -v ON_ERROR_STOP=1 -f prisma/admin/create-runtime-role.sql
       - run: npx prisma migrate deploy
       - name: Grant runtime permissions and enable isolated test login
         run: |
           psql "$TEST_ADMIN_DATABASE_URL" -v ON_ERROR_STOP=1 -f prisma/admin/grant-runtime-role.sql
+          psql "$TEST_ADMIN_DATABASE_URL" -v ON_ERROR_STOP=1 -f prisma/admin/grant-auth-role.sql
+          psql "$TEST_ADMIN_DATABASE_URL" -v ON_ERROR_STOP=1 -c "ALTER ROLE campusconnect_auth LOGIN PASSWORD 'test_auth_password'"
           psql "$TEST_ADMIN_DATABASE_URL" -v ON_ERROR_STOP=1 -c "ALTER ROLE campusconnect_runtime LOGIN PASSWORD 'test_only_password'"
       - run: npm run test:integration
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
+      - run: node scripts/seed-e2e.mjs
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
       - name: Record audit
